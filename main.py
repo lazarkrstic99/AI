@@ -96,15 +96,14 @@ def printBoard(state):
     asdasdas
     '''
 
-def playMove(pawn,field,wall):
+def playMove(pawn: str,field : tuple, wall : tuple, wallColor:str, state):
     '''
-    validacija
+    validacija ide u zasebnu fju
     promena stanja
-    :param pawn:
-    :param field:
-    :param wall:
-    :return: bool isValid
     '''
+    state[2][pawn] = field
+    state[3][wall] = wallColor
+    return state
 
 while gameParamInput() is not True:
     next
