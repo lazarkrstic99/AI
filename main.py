@@ -7,28 +7,25 @@ reprezentacija stanja:
 '''
 
 def setup(x,y,brZidova,xx1,xy1,xx2,xy2,ox1,oy1,ox2,oy2,isAIFirst):
-    '''
-    todo implementiraj
-    :param x:
-    :param y:
-    :param brZidova:
-    :param xx1:
-    :param xy1:
-    :param xx2:
-    :param xy2:
-    :param ox1:
-    :param oy1:
-    :param ox2:
-    :param oy2:
-    :return:
-    '''
+    state = tuple()
+    state = ([x, y], {"X1": (xx1, xy1), "X2": (xx2, xy2), "O1": (ox1, oy1), "O2": (ox2, oy2)}, {"X1": (xx1, xy1), "X2": (xx2, xy2), "O1": (ox1, oy1), "O2": (ox2, oy2)}, {}, ([brZidova, brZidova], [brZidova, brZidova]))
+    startGame(state, isAIFirst)
 
 def isEnd(state):
-    '''
-    :param state:
-    :return: bool isEnded
-    '''
 
+    if state[2]["X1"] == state[1]["O1"] or state[2]["X1"] == state[1]["O2"]:
+        print("X je pobednik!")
+        return True
+    if state[2]["X2"] == state[1]["O1"] or state[2]["X2"] == state[1]["O2"]:
+        print("X je pobednik!")
+        return True
+    if state[2]["O1"] == state[1]["X1"] or state[2]["O1"] == state[1]["X2"]:
+        print("O je pobednik!")
+        return True
+    if state[2]["O2"] == state[1]["X1"] or state[2]["O2"] == state[1]["X2"]:
+        print("O je pobednik!")
+        return True
+    return False
 def gameParamInput():
     '''
     unos sa konzole
@@ -52,4 +49,11 @@ def playMove(pawn,field,wall):
     :param field:
     :param wall:
     :return: bool isValid
+    '''
+def startGame(state, isAIFirst):
+    '''
+    krece igra
+    :param state:
+    :param isAIFirst:
+    :return:
     '''
