@@ -93,6 +93,7 @@ def printBoard(state):
     stampa tablu na konzolu
     :param 1state:
     :return:
+    asdasdas
     '''
 
 def playMove(pawn,field,wall):
