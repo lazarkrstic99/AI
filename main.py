@@ -132,15 +132,37 @@ def printBoard(state):
 
 
 
-def playMove(pawn,field,wall):
+def playMove(pawn: str,field : tuple, wall : tuple, wallColor:str, state):
     '''
-    validacija
+    validacija ide u zasebnu fju
     promena stanja
-    :param pawn:
-    :param field:
-    :param wall:
-    :return: bool isValid
     '''
+    state[2][pawn] = field
+    state[3][wall] = wallColor
+    return state
+def inputandvalidatemove(pawn: str, field :tuple, wall:tuple, wallColor:str,state):
+    isValid = False
+    while not isValid:
+        pawn = input("Unesite ime figure(X1,X2,O1,O2): ")
+        if pawn == "X1" or pawn == "X2" or pawn == "O1" or pawn == "O2":
+           isValid = True
+        else:
+           isValid = False
+           print("Pogresna figura!")
+        x, y = input("Unesite polje %s igraca (x,y): ", pawn).split(",")
+        x = int(x)
+        y = int(y)
+        #granice table
+        if x < state[0][0] or x > state[0][0] or y < state[0][1] or y > state[0][1]:
+            isValid = False
+        else:
+            isValid = True
+            print("Pokusavate postaviti figuru izvan table!")
+        #da li je zid ispred ili igrac
+        #if state[2][pawn][0]+2 == x and state[2][pawn][0]+2 < state[0][0] and state[3][(state[2][pawn][0]+2, y)] is None:
+
+
+
 
 printBoard(([11, 14], {"X1": (2, 2), "X2": (4, 2), "O1": (2, 8), "O2": (6, 8)}, {"X1": (2, 3), "X2": (4, 6), "O1": (2, 8), "O2": (6, 10)}, {}, ([10, 10], [10, 10])))
 while gameParamInput() is not True:
