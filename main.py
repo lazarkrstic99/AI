@@ -6,10 +6,10 @@ reprezentacija stanja:
 ([x,y],{"X1":(x,y),"X2":(x,y),"O1":(x,y),"O2":(x,y)},{"X1":[x,y],"X2":[x,y],"O1":[x,y],"O2":[x,y]},{(x,y):"Z|P"},([<preostaliZeleni>,<preostaliPlavi>],[<preostaliZeleni>,<preostaliPlavi>]))
 '''
 
-def setup(x,y,brZidova,xx1,xy1,xx2,xy2,ox1,oy1,ox2,oy2,isAIFirst):
+def startGame(x,y,brZidova,xx1,xy1,xx2,xy2,ox1,oy1,ox2,oy2,isAIFirst):
     state = tuple()
     state = ([x, y], {"X1": (xx1, xy1), "X2": (xx2, xy2), "O1": (ox1, oy1), "O2": (ox2, oy2)}, {"X1": (xx1, xy1), "X2": (xx2, xy2), "O1": (ox1, oy1), "O2": (ox2, oy2)}, {}, ([brZidova, brZidova], [brZidova, brZidova]))
-    startGame(state, isAIFirst)
+
 
 def isEnd(state):
 
@@ -82,7 +82,7 @@ def gameParamInput():
             isAIFirst=True
         else:
             raise Exception()
-        setup(x,y,brZidova,xx1,xy1,xx2,xy2,ox1,oy1,ox2,oy2,isAIFirst)
+        startGame(x,y,brZidova,xx1,xy1,xx2,xy2,ox1,oy1,ox2,oy2,isAIFirst)
         return True
     except:
         print("Nevalidan unos!")
@@ -106,12 +106,5 @@ def playMove(pawn,field,wall):
     :return: bool isValid
     '''
 
-def startGame(state, isAIFirst):
-    '''
-    krece igra
-    :param state:
-    :param isAIFirst:
-    :return:
-    '''
 while gameParamInput() is not True:
     next
