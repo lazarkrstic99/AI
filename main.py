@@ -5,13 +5,15 @@ reprezentacija stanja:
 ([dimenzijeTable],{pocetnePozicije},{pozicijePesaka},{pozicijeZidova},(preostaliZidovi))
 ([x,y],{"X1":(x,y),"X2":(x,y),"O1":(x,y),"O2":(x,y)},{"X1":[x,y],"X2":[x,y],"O1":[x,y],"O2":[x,y]},{(x,y):"Z|P"},([<preostaliZeleni>,<preostaliPlavi>],[<preostaliZeleni>,<preostaliPlavi>]))
 '''
-
+import os
 numberConversion=(1,2,3,4,5,6,7,8,9,'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S')
+
+def cls():
+    os.system('cls' if os.name=='nt' else 'clear')
 
 def startGame(x,y,brZidova,xx1,xy1,xx2,xy2,ox1,oy1,ox2,oy2,isAIFirst):
     state = tuple()
     state = ([x, y], {"X1": (xx1, xy1), "X2": (xx2, xy2), "O1": (ox1, oy1), "O2": (ox2, oy2)}, {"X1": (xx1, xy1), "X2": (xx2, xy2), "O1": (ox1, oy1), "O2": (ox2, oy2)}, {}, ([brZidova, brZidova], [brZidova, brZidova]))
-
 
 def isEnd(state):
 
@@ -91,6 +93,7 @@ def gameParamInput():
         return False
 
 def printBoard(state):
+    cls()
     printval="  "
     for i in range(0,state[0][1]):
         printval+=str(numberConversion[i])
@@ -102,7 +105,7 @@ def printBoard(state):
         printval+=" "
     print(printval)
     for i in range(0,state[0][0]):
-        printField=str(numberConversion[i+1])
+        printField=str(numberConversion[i])
         printField+= "ǁ"
         printWall="  "
         for j in range(0,state[0][1]):
@@ -117,20 +120,20 @@ def printBoard(state):
             else:
                 printField+=" "
             
-            if (i>0 and (i-1,j) in state[4] and state[4][(i-1,j)]=="Z") or ((i,j) in state[4] and state[4][(i,j)]=="Z"):
+            if (i>0 and (i-1,j) in state[3].keys() and state[3][(i-1,j)]=="Z") or ((i,j) in state[3].keys() and state[3][(i,j)]=="Z") or j==state[0][1]-1:
                 printField+="ǁ"
             else:
                 printField+="|"
             
-            if(j>0 and (i,j-1) in state[4] and state[4][(i,j-1)]=="P") or ((i,j) in state[4] and state[4][(i,j)]=="P"):
+            if(j>0 and (i,j-1) in state[3].keys() and state[3][(i,j-1)]=="P") or ((i,j) in state[3].keys() and state[3][(i,j)]=="P") or i==state[0][0]-1:
                 printWall+="="
             else:
                 printWall+="-"
             
             printWall+=" "
+        print(printField)
+        print(printWall)
             
-
-
 
 def playMove(pawn: str,field : tuple, wall : tuple, wallColor:str, state):
     '''
@@ -163,7 +166,7 @@ def inputandvalidatemove(pawn: str, field :tuple, wall:tuple, wallColor:str,stat
 
 
 
-
-printBoard(([11, 14], {"X1": (2, 2), "X2": (4, 2), "O1": (2, 8), "O2": (6, 8)}, {"X1": (2, 3), "X2": (4, 6), "O1": (2, 8), "O2": (6, 10)}, {}, ([10, 10], [10, 10])))
+state=([11, 14], {"X1": (2, 2), "X2": (4, 2), "O1": (2, 8), "O2": (6, 8)}, {"X1": (2, 3), "X2": (4, 6), "O1": (2, 8), "O2": (6, 10)}, {(0,0):"Z",(3,3):"Z",(6,6):"P"}, ([10, 10], [10, 10]))
+printBoard(state)
 while gameParamInput() is not True:
     next
