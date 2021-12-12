@@ -11,10 +11,6 @@ numberConversion=(1,2,3,4,5,6,7,8,9,'A','B','C','D','E','F','G','H','I','J','K',
 def cls():
     os.system('cls' if os.name=='nt' else 'clear')
 
-def startGame(x,y,brZidova,xx1,xy1,xx2,xy2,ox1,oy1,ox2,oy2,isAIFirst):
-    state = tuple()
-    state = ([x, y], {"X1": (xx1, xy1), "X2": (xx2, xy2), "O1": (ox1, oy1), "O2": (ox2, oy2)}, {"X1": (xx1, xy1), "X2": (xx2, xy2), "O1": (ox1, oy1), "O2": (ox2, oy2)}, {}, ([brZidova, brZidova], [brZidova, brZidova]))
-
 def isEnd(state):
 
     if state[2]["X1"] == state[1]["O1"] or state[2]["X1"] == state[1]["O2"]:
@@ -133,64 +129,140 @@ def printBoard(state):
             printWall+=" "
         print(printField)
         print(printWall)
-    while inputandvalidatemove(state) is not True:
-        next
-            
 
 def playMove(pawn: str,field : tuple, wall : tuple, wallColor:str, state):
-    '''
-    validacija ide u zasebnu fju
-    promena stanja
-    '''
     state[2][pawn] = field
     state[3][wall] = wallColor
     return state
-def inputandvalidatemove(state):
-    isValid = False
-    while not isValid:
-        pawn = input("Unesite ime figure(X1,X2,O1,O2): ")
-        if pawn == "X1" or pawn == "X2" or pawn == "O1" or pawn == "O2":
-           isValid = True
-        else:
-           isValid = False
-           print("Pogresna figura!")
-           return isValid
-        x, y = input("Unesite polje igraca (x,y): ").split(",")
-        x = int(x)
-        y = int(y)
-        #granice table
-        if x < state[0][0] and x > 0 and y < state[0][1] and y > 0:
-            isValid = True
-        else:
-            isValid = False
-            print("Pokusavate postaviti figuru izvan table!")
-            return isValid
-        #da li moze da se pomeri, da li je zid ispred i da li je neki igrac ispred
 
-        if (state[2][pawn][0]+2 == x and state[2][pawn][0]+2 < state[0][0] and state[3][(state[2][pawn][0]+1, y)] is None and state[2]["X1"][0] != x and state[2]["X2"][0] != x and state[2]["O1"][0] != x and state[2]["O2"][0] != x)\
-                or (state[2][pawn][0]-2 == x and state[2][pawn][0]-2 > 0 and state[3][(state[2][pawn][0]-1, y)] is None and state[2]["X1"][0] != x and state[2]["X2"][0] != x and state[2]["O1"][0] != x and state[2]["O2"][0] != x)\
-                or (state[2][pawn][1]+2 == y and state[2][pawn][y]+2 < state[0][1] and state[3][x, (state[2][pawn][1]+1)] is None and state[2]["X1"][1] != y and state[2]["X2"][1] != y and state[2]["O1"][1] != y and state[2]["O2"][1] != y)\
-                or (state[2][pawn][1]-2 == y and state[2][pawn][y]-2 < state[0][1] and state[3][x, (state[2][pawn][1]-1)] is None and state[2]["X1"][1] != y and state[2]["X2"][1] != y and state[2]["O1"][1] != y and state[2]["O2"][1] != y)\
-                or (state[2][pawn][0]+1 == x and state[2][pawn][1]+1 == y and state[3][(state[2][pawn][0]+1, y)] is None and state[3][x, (state[2][pawn][1]+1)] is None and state[2]["X1"][0] != x and state[2]["X2"][0] != x and state[2]["O1"][0] != x and state[2]["O2"][0] != x and state[2]["X1"][1] != y and state[2]["X2"][1] != y and state[2]["O1"][1] != y and state[2]["O2"][1] != y)\
-                or (state[2][pawn][0]-1 == x and state[2][pawn][1]+1 == y and state[3][(state[2][pawn][0]-1, y)] is None and state[3][x, (state[2][pawn][1]+1)] is None and state[2]["X1"][0] != x and state[2]["X2"][0] != x and state[2]["O1"][0] != x and state[2]["O2"][0] != x and state[2]["X1"][1] != y and state[2]["X2"][1] != y and state[2]["O1"][1] != y and state[2]["O2"][1] != y) \
-                or (state[2][pawn][0] - 1 == x and state[2][pawn][1] - 1 == y and state[3][(state[2][pawn][0] - 1, y)] is None and state[3][x, (state[2][pawn][1] - 1)] is None and state[2]["X1"][0] != x and state[2]["X2"][0] != x and state[2]["O1"][0] != x and state[2]["O2"][0] != x and state[2]["X1"][1] != y and state[2]["X2"][1] != y and state[2]["O1"][1] != y and state[2]["O2"][1] != y) \
-                or (state[2][pawn][0] + 1 == x and state[2][pawn][1] - 1 == y and state[3][(state[2][pawn][0] + 1, y)] is None and state[3][x, (state[2][pawn][1] - 1)] is None and state[2]["X1"][0] != x and state[2]["X2"][0] != x and state[2]["O1"][0] != x and state[2]["O2"][0] != x and state[2]["X1"][1] != y and state[2]["X2"][1] != y and state[2]["O1"][1] != y and state[2]["O2"][1] != y):
-                isValid = True
-        else:
-            isValid = False
-            print("Nemoguce postaviti figuru na zadato polje!")
-            return isValid
-        color, x, y = input("Unesite zid (color,x,y): ").split(",")
-        x = int(x)
-        y = int(y)
-        #da li moze da postavi zid
-        if(state[3][(x-1,y)] is None and state[3][(x+1,y)] is None and state[3][(x,y-1)] is None and state[3][(x,y+1)]):
-            isValid = True
-        else:
-            isValid = False
-            return isValid
-    return isValid
+def inputMove(state):
+    pawn = input("Unesite ime figure(X1,X2,O1,O2): ")
+    if not (pawn == "X1" or pawn == "X2" or pawn == "O1" or pawn == "O2"):
+        print("Pogresna figura!")
+        return False
+    x, y = input("Unesite polje igraca (x,y): ").split(",")
+    x = int(x)-1
+    y = int(y)-1
+    if not validatePawnMove(state,pawn,x,y):
+        print("Nevalidan potez pijuna")
+        return False
+    color, xw, yw = input("Unesite zid (color,x,y): ").split(",")
+    xw = int(xw)-1
+    yw = int(yw)-1
+    if not (color=="P" or color=="Z"):
+        print("Nevalidna boja zida")
+        return False
+    if not validateWallPlacement(state,color,xw,yw):
+        print("Nevalidan polozaj zida")
+        return False
+    return playMove(pawn,(x,y),(xw,yw),color,state)
+
+def startGame(x,y,brZidova,xx1,xy1,xx2,xy2,ox1,oy1,ox2,oy2,isAIFirst):
+    state = tuple()
+    state = ([x, y], {"X1": (xx1, xy1), "X2": (xx2, xy2), "O1": (ox1, oy1), "O2": (ox2, oy2)}, {"X1": (xx1, xy1), "X2": (xx2, xy2), "O1": (ox1, oy1), "O2": (ox2, oy2)}, {}, ([brZidova, brZidova], [brZidova, brZidova]))
+    if not isAIFirst:
+        newState=inputMove(state)
+        while not newState:
+            newState=inputMove(state)
+        printBoard(state)
+        #AI igra potez
+    else:
+        '''AI'''
+        #AI igra potez
+
+def wallAt(state,color,x,y):
+    if (x,y) in state[3].keys() and state[3][(x,y)]==color:
+        return True
+    return False
+
+def pawnAt(state,x,y):
+    if state[2]["X1"]==(x,y) or state[2]["X2"]==(x,y) or state[2]["O1"]==(x,y) or state[2]["O2"]==(x,y):
+        return True
+    return False
+
+def validatePawnMove(state,pawn,x,y):
+    #opseg table
+    if x<0 or x>state[0][0]-1 or y<0 or y>state[0][1]-1:
+        return False
+
+    if(state[2][pawn][0]+2==x and state[2][pawn][1]==y):
+        #dole 2
+        if not (wallAt(state,"P",state[2][pawn][0],state[2][pawn][1]) or wallAt(state,"P",state[2][pawn][0]+1,state[2][pawn][1]) or wallAt(state,"P",state[2][pawn][0],state[2][pawn][1]-1) or wallAt(state,"P",state[2][pawn][0]+1,state[2][pawn][1]-1)):
+            if not pawnAt(state, x,y):
+                return True
+              
+    elif(state[2][pawn][0]-2==x and state[2][pawn][1]==y):
+        #gore 2
+        if not (wallAt(state,"P",state[2][pawn][0]-1,state[2][pawn][1]) or wallAt(state,"P",state[2][pawn][0]-2,state[2][pawn][1]) or wallAt(state,"P",state[2][pawn][0]-1,state[2][pawn][1]-1) or wallAt(state,"P",state[2][pawn][0]-2,state[2][pawn][1]-1)):
+            if not pawnAt(state, x,y):
+                return True
+    
+    elif(state[2][pawn][0]==x and state[2][pawn][1]+2==y):
+        #desno 2
+        if not (wallAt(state,"Z",state[2][pawn][0],state[2][pawn][1]) or wallAt(state,"Z",state[2][pawn][0],state[2][pawn][1]+1) or wallAt(state,"Z",state[2][pawn][0]-1,state[2][pawn][1]) or wallAt(state,"Z",state[2][pawn][0]-1,state[2][pawn][1]+1)):
+            if not pawnAt(state, x,y):
+                return True
+
+    elif(state[2][pawn][0]==x and state[2][pawn][1]-2==y):
+        #levo 2
+        if not (wallAt(state,"Z",state[2][pawn][0],state[2][pawn][1]-1) or wallAt(state,"Z",state[2][pawn][0],state[2][pawn][1]-2) or wallAt(state,"Z",state[2][pawn][0]-1,state[2][pawn][1]-1) or wallAt(state,"Z",state[2][pawn][0]-1,state[2][pawn][1]-2)):
+            if not pawnAt(state, x,y):
+                return True
+
+    elif(state[2][pawn][0]+1==x and state[2][pawn][1]+1==y):
+        #dole desno
+        if not wallAt(state,"Z",state[2][pawn][0],state[2][pawn][1]) or wallAt(state,"P",state[2][pawn][0],state[2][pawn][1]) or (wallAt(state,"Z",state[2][pawn][0]-1,state[2][pawn][1]) and wallAt(state,"P",state[2][pawn][0],state[2][pawn][1]-1)) or (wallAt(state,"Z",state[2][pawn][0]+1,state[2][pawn][1]) and wallAt(state,"P",state[2][pawn][0],state[2][pawn][1]+1)):
+            if not pawnAt(state, x,y):
+                return True
+
+    elif(state[2][pawn][0]+1==x and state[2][pawn][1]-1==y):
+        #dole levo
+        if not wallAt(state,"Z",state[2][pawn][0],state[2][pawn][1]-1) or wallAt(state,"P",state[2][pawn][0],state[2][pawn][1]-1) or (wallAt(state,"Z",state[2][pawn][0]-1,state[2][pawn][1]-1) and wallAt(state,"P",state[2][pawn][0],state[2][pawn][1]-2)) or (wallAt(state,"Z",state[2][pawn][0]+1,state[2][pawn][1]-1) and wallAt(state,"P",state[2][pawn][0],state[2][pawn][1]-2)):
+            if not pawnAt(state, x,y):
+                return True
+
+    elif(state[2][pawn][0]-1==x and state[2][pawn][1]+1==y):
+        #gore desno
+        if not wallAt(state,"Z",state[2][pawn][0]-1,state[2][pawn][1]) or wallAt(state,"P",state[2][pawn][0]-1,state[2][pawn][1]) or (wallAt(state,"Z",state[2][pawn][0],state[2][pawn][1]) and wallAt(state,"P",state[2][pawn][0]-1,state[2][pawn][1]-2)) or (wallAt(state,"Z",state[2][pawn][0]-2,state[2][pawn][1]) and wallAt(state,"P",state[2][pawn][0]-1,state[2][pawn][1]+1)):
+            if not pawnAt(state, x,y):
+                return True
+
+    elif(state[2][pawn][0]-1==x and state[2][pawn][1]-1==y):
+        #gore levo
+        if not wallAt(state,"Z",state[2][pawn][0]-1,state[2][pawn][1]-1) or wallAt(state,"P",state[2][pawn][0]-1,state[2][pawn][1]-1) or (wallAt(state,"Z",state[2][pawn][0]-1,state[2][pawn][1]) and wallAt(state,"P",state[2][pawn][0]-1,state[2][pawn][1])) or (wallAt(state,"Z",state[2][pawn][0]-1,state[2][pawn][1]-2) and wallAt(state,"P",state[2][pawn][0]-1,state[2][pawn][1]-2)):
+            if not pawnAt(state, x,y):
+                return True
+
+    elif(state[2][pawn][0]+1==x and state[2][pawn][1]==y):
+        if not (wallAt(state,"P",state[2][pawn][0],state[2][pawn][1]) or wallAt(state,"P",state[2][pawn][0]+1,state[2][pawn][1]) or wallAt(state,"P",state[2][pawn][0],state[2][pawn][1]-1) or wallAt(state,"P",state[2][pawn][0]+1,state[2][pawn][1]-1)):
+            if pawnAt(state, x+1,y):
+                return True
+    elif(state[2][pawn][0]-1==x and state[2][pawn][1]==y):
+        if not (wallAt(state,"P",state[2][pawn][0]-1,state[2][pawn][1]) or wallAt(state,"P",state[2][pawn][0]-2,state[2][pawn][1]) or wallAt(state,"P",state[2][pawn][0]-1,state[2][pawn][1]-1) or wallAt(state,"P",state[2][pawn][0]-2,state[2][pawn][1]-1)):
+            if pawnAt(state, x-1,y):
+                return True
+    elif(state[2][pawn][0]==x and state[2][pawn][1]+1==y):
+        #desno 1
+        if not (wallAt(state,"Z",state[2][pawn][0],state[2][pawn][1]) or wallAt(state,"Z",state[2][pawn][0],state[2][pawn][1]+1) or wallAt(state,"Z",state[2][pawn][0]-1,state[2][pawn][1]) or wallAt(state,"Z",state[2][pawn][0]-1,state[2][pawn][1]+1)):
+            if pawnAt(state, x,y+1):
+                return True
+    elif(state[2][pawn][0]==x and state[2][pawn][1]-1==y):
+        #levo 1
+        if not (wallAt(state,"Z",state[2][pawn][0],state[2][pawn][1]-1) or wallAt(state,"Z",state[2][pawn][0],state[2][pawn][1]-2) or wallAt(state,"Z",state[2][pawn][0]-1,state[2][pawn][1]-1) or wallAt(state,"Z",state[2][pawn][0]-1,state[2][pawn][1]-2)):
+            if pawnAt(state, x,y-1):
+                return True
+    return False
+
+def validateWallPlacement(state,color,x,y):
+    if not wallAt(state,"P",x,y) and not wallAt(state,"Z",x,y):
+        if color=="P":
+            if not wallAt(state,"P",x,y-1):
+                return True
+        if color=="Z":
+            if not wallAt(state,"Z",x-1,y):
+                return True
+    return False
+
 state=([11, 14], {"X1": (2, 2), "X2": (4, 2), "O1": (2, 8), "O2": (6, 8)}, {"X1": (2, 3), "X2": (4, 6), "O1": (2, 8), "O2": (6, 10)}, {(0,0):"Z",(3,3):"Z",(6,6):"P"}, ([10, 10], [10, 10]))
-printBoard(state)
 while gameParamInput() is not True:
     next
