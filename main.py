@@ -133,6 +133,8 @@ def printBoard(state):
             printWall+=" "
         print(printField)
         print(printWall)
+    while inputandvalidatemove(state) is not True:
+        next
             
 
 def playMove(pawn: str,field : tuple, wall : tuple, wallColor:str, state):
@@ -143,7 +145,7 @@ def playMove(pawn: str,field : tuple, wall : tuple, wallColor:str, state):
     state[2][pawn] = field
     state[3][wall] = wallColor
     return state
-def inputandvalidatemove(pawn: str, field :tuple, wall:tuple, wallColor:str,state):
+def inputandvalidatemove(state):
     isValid = False
     while not isValid:
         pawn = input("Unesite ime figure(X1,X2,O1,O2): ")
@@ -152,20 +154,42 @@ def inputandvalidatemove(pawn: str, field :tuple, wall:tuple, wallColor:str,stat
         else:
            isValid = False
            print("Pogresna figura!")
-        x, y = input("Unesite polje %s igraca (x,y): ", pawn).split(",")
+           return isValid
+        x, y = input("Unesite polje igraca (x,y): ").split(",")
         x = int(x)
         y = int(y)
         #granice table
-        if x < state[0][0] or x > state[0][0] or y < state[0][1] or y > state[0][1]:
-            isValid = False
-        else:
+        if x < state[0][0] and x > 0 and y < state[0][1] and y > 0:
             isValid = True
+        else:
+            isValid = False
             print("Pokusavate postaviti figuru izvan table!")
-        #da li je zid ispred ili igrac
-        #if state[2][pawn][0]+2 == x and state[2][pawn][0]+2 < state[0][0] and state[3][(state[2][pawn][0]+2, y)] is None:
+            return isValid
+        #da li moze da se pomeri, da li je zid ispred i da li je neki igrac ispred
 
-
-
+        if (state[2][pawn][0]+2 == x and state[2][pawn][0]+2 < state[0][0] and state[3][(state[2][pawn][0]+1, y)] is None and state[2]["X1"][0] != x and state[2]["X2"][0] != x and state[2]["O1"][0] != x and state[2]["O2"][0] != x)\
+                or (state[2][pawn][0]-2 == x and state[2][pawn][0]-2 > 0 and state[3][(state[2][pawn][0]-1, y)] is None and state[2]["X1"][0] != x and state[2]["X2"][0] != x and state[2]["O1"][0] != x and state[2]["O2"][0] != x)\
+                or (state[2][pawn][1]+2 == y and state[2][pawn][y]+2 < state[0][1] and state[3][x, (state[2][pawn][1]+1)] is None and state[2]["X1"][1] != y and state[2]["X2"][1] != y and state[2]["O1"][1] != y and state[2]["O2"][1] != y)\
+                or (state[2][pawn][1]-2 == y and state[2][pawn][y]-2 < state[0][1] and state[3][x, (state[2][pawn][1]-1)] is None and state[2]["X1"][1] != y and state[2]["X2"][1] != y and state[2]["O1"][1] != y and state[2]["O2"][1] != y)\
+                or (state[2][pawn][0]+1 == x and state[2][pawn][1]+1 == y and state[3][(state[2][pawn][0]+1, y)] is None and state[3][x, (state[2][pawn][1]+1)] is None and state[2]["X1"][0] != x and state[2]["X2"][0] != x and state[2]["O1"][0] != x and state[2]["O2"][0] != x and state[2]["X1"][1] != y and state[2]["X2"][1] != y and state[2]["O1"][1] != y and state[2]["O2"][1] != y)\
+                or (state[2][pawn][0]-1 == x and state[2][pawn][1]+1 == y and state[3][(state[2][pawn][0]-1, y)] is None and state[3][x, (state[2][pawn][1]+1)] is None and state[2]["X1"][0] != x and state[2]["X2"][0] != x and state[2]["O1"][0] != x and state[2]["O2"][0] != x and state[2]["X1"][1] != y and state[2]["X2"][1] != y and state[2]["O1"][1] != y and state[2]["O2"][1] != y) \
+                or (state[2][pawn][0] - 1 == x and state[2][pawn][1] - 1 == y and state[3][(state[2][pawn][0] - 1, y)] is None and state[3][x, (state[2][pawn][1] - 1)] is None and state[2]["X1"][0] != x and state[2]["X2"][0] != x and state[2]["O1"][0] != x and state[2]["O2"][0] != x and state[2]["X1"][1] != y and state[2]["X2"][1] != y and state[2]["O1"][1] != y and state[2]["O2"][1] != y) \
+                or (state[2][pawn][0] + 1 == x and state[2][pawn][1] - 1 == y and state[3][(state[2][pawn][0] + 1, y)] is None and state[3][x, (state[2][pawn][1] - 1)] is None and state[2]["X1"][0] != x and state[2]["X2"][0] != x and state[2]["O1"][0] != x and state[2]["O2"][0] != x and state[2]["X1"][1] != y and state[2]["X2"][1] != y and state[2]["O1"][1] != y and state[2]["O2"][1] != y):
+                isValid = True
+        else:
+            isValid = False
+            print("Nemoguce postaviti figuru na zadato polje!")
+            return isValid
+        color, x, y = input("Unesite zid (color,x,y): ").split(",")
+        x = int(x)
+        y = int(y)
+        #da li moze da postavi zid
+        if(state[3][(x-1,y)] is None and state[3][(x+1,y)] is None and state[3][(x,y-1)] is None and state[3][(x,y+1)]):
+            isValid = True
+        else:
+            isValid = False
+            return isValid
+    return isValid
 state=([11, 14], {"X1": (2, 2), "X2": (4, 2), "O1": (2, 8), "O2": (6, 8)}, {"X1": (2, 3), "X2": (4, 6), "O1": (2, 8), "O2": (6, 10)}, {(0,0):"Z",(3,3):"Z",(6,6):"P"}, ([10, 10], [10, 10]))
 printBoard(state)
 while gameParamInput() is not True:
