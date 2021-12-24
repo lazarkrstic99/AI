@@ -3,10 +3,14 @@ FAZA I
 
 reprezentacija stanja:
 ([dimenzijeTable],{pocetnePozicije},{pozicijePesaka},{pozicijeZidova},(preostaliZidovi))
-([x,y],{"X1":(x,y),"X2":(x,y),"O1":(x,y),"O2":(x,y)},{"X1":[x,y],"X2":[x,y],"O1":[x,y],"O2":[x,y]},{(x,y):"Z|P"},([<preostaliZeleni>,<preostaliPlavi>],[<preostaliZeleni>,<preostaliPlavi>]))
+([x,y],{"X1":(x,y),"X2":(x,y),"O1":(x,y),"O2":(x,y)},{"X1":(x,y),"X2":(x,y),"O1":(x,y),"O2":(x,y)},{(x,y):"Z|P"},([<preostaliZeleni>,<preostaliPlavi>],[<preostaliZeleni>,<preostaliPlavi>]))
 '''
 import os
+import math
+import copy
+
 numberConversion=(1,2,3,4,5,6,7,8,9,'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S')
+sampleState=([11, 14], {"X1": (2, 2), "X2": (4, 2), "O1": (2, 8), "O2": (6, 8)}, {"X1": (2, 3), "X2": (4, 6), "O1": (2, 8), "O2": (6, 10)}, {(0,0):"Z",(3,3):"Z",(6,6):"P"}, ([10, 10], [10, 10]))
 
 def cls():
     os.system('cls' if os.name=='nt' else 'clear')
@@ -14,17 +18,13 @@ def cls():
 def isEnd(state):
 
     if state[2]["X1"] == state[1]["O1"] or state[2]["X1"] == state[1]["O2"]:
-        print("X je pobednik!")
-        return True
+        return "X"
     if state[2]["X2"] == state[1]["O1"] or state[2]["X2"] == state[1]["O2"]:
-        print("X je pobednik!")
-        return True
+        return "X"
     if state[2]["O1"] == state[1]["X1"] or state[2]["O1"] == state[1]["X2"]:
-        print("O je pobednik!")
-        return True
+        return "O"
     if state[2]["O2"] == state[1]["X1"] or state[2]["O2"] == state[1]["X2"]:
-        print("O je pobednik!")
-        return True
+        return "O"
     return False
 
 def gameParamInput():
@@ -83,10 +83,9 @@ def gameParamInput():
         else:
             raise Exception()
         startGame(x,y,brZidova,xx1,xy1,xx2,xy2,ox1,oy1,ox2,oy2,isAIFirst)
-        return True
     except:
         print("Nevalidan unos!")
-        return False
+        gameParamInput()
 
 def printBoard(state):
     cls()
@@ -130,45 +129,83 @@ def printBoard(state):
         print(printField)
         print(printWall)
 
-def playMove(pawn: str,field : tuple, wall : tuple, wallColor:str, state):
-    state[2][pawn] = field
-    state[3][wall] = wallColor
-    return state
-
-def inputMove(state):
-    pawn = input("Unesite ime figure(X1,X2,O1,O2): ")
-    if not (pawn == "X1" or pawn == "X2" or pawn == "O1" or pawn == "O2"):
-        print("Pogresna figura!")
-        return False
-    x, y = input("Unesite polje igraca (x,y): ").split(",")
+def inputMove(state,isX):
+    pawn=str()
+    if isX:
+        pawn = input("Unesite ime figure(X1,X2): ")
+        if not (pawn == "X1" or pawn == "X2"):
+            print("Pogresna figura!")
+            return False
+    else:
+        pawn = input("Unesite ime figure(O1,O2): ")
+        if not (pawn == "O1" or pawn == "O2"):
+            print("Pogresna figura!")
+            return False
+    x, y = input("Unesite polje (x,y): ").split(",")
     x = int(x)-1
     y = int(y)-1
     if not validatePawnMove(state,pawn,x,y):
         print("Nevalidan potez pijuna")
         return False
+    state=placePawn(pawn,(x,y),state)
     color, xw, yw = input("Unesite zid (color,x,y): ").split(",")
     xw = int(xw)-1
     yw = int(yw)-1
     if not (color=="P" or color=="Z"):
         print("Nevalidna boja zida")
         return False
-    if not validateWallPlacement(state,color,xw,yw):
+    if not validateWallPlacement(state,color,xw,yw,isX):
         print("Nevalidan polozaj zida")
         return False
-    return playMove(pawn,(x,y),(xw,yw),color,state)
+    return placeWall((xw,yw),color,state,isX)
 
 def startGame(x,y,brZidova,xx1,xy1,xx2,xy2,ox1,oy1,ox2,oy2,isAIFirst):
     state = tuple()
     state = ([x, y], {"X1": (xx1, xy1), "X2": (xx2, xy2), "O1": (ox1, oy1), "O2": (ox2, oy2)}, {"X1": (xx1, xy1), "X2": (xx2, xy2), "O1": (ox1, oy1), "O2": (ox2, oy2)}, {}, ([brZidova, brZidova], [brZidova, brZidova]))
     if not isAIFirst:
-        newState=inputMove(state)
-        while not newState:
-            newState=inputMove(state)
-        printBoard(state)
-        #AI igra potez
+        while not isEnd(state):
+            newState=inputMove(state,True)
+            while not newState:
+                newState=inputMove(state,True)
+            state=newState
+            printBoard(state)
+
+            if isEnd(state):
+                print(isEnd(state)," je pobednik!")
+                #newGame eventualno
+                return
+
+            #AI/drugi igrac igra potez
+            newState=inputMove(state,False)
+            while not newState:
+                newState=inputMove(state,False)
+            state=newState
+            printBoard(state)
+        print(isEnd(state)," je pobednik!")
+        #newGame eventualno
+        return
     else:
-        '''AI'''
-        #AI igra potez
+        while not isEnd(state):
+            #AI/drugi igrac igra potez
+            newState=inputMove(state,True)
+            while not newState:
+                newState=inputMove(state,True)
+            state=newState
+            printBoard(state)
+
+            if isEnd(state):
+                print(isEnd(state)," je pobednik!")
+                #newGame eventualno
+                return
+            
+            newState=inputMove(state,False)
+            while not newState:
+                newState=inputMove(state,False)
+            state=newState
+            printBoard(state)
+        print(isEnd(state)," je pobednik!")
+        #newGame eventualno
+        return
 
 def wallAt(state,color,x,y):
     if (x,y) in state[3].keys() and state[3][(x,y)]==color:
@@ -253,16 +290,146 @@ def validatePawnMove(state,pawn,x,y):
                 return True
     return False
 
-def validateWallPlacement(state,color,x,y):
-    if not wallAt(state,"P",x,y) and not wallAt(state,"Z",x,y):
-        if color=="P":
-            if not wallAt(state,"P",x,y-1):
-                return True
-        if color=="Z":
-            if not wallAt(state,"Z",x-1,y):
-                return True
+'''
+FAZA II
+'''
+def possibleMoves(state,pawn):
+    states=list()
+    field=state[2][pawn]
+    field[0]-=2
+    if validatePawnMove(state,pawn,field[0],field[1]):
+        possibleState=placePawn(pawn,field,state)
+        states.append(possibleState)
+    field[0]+=1
+    field[1]+=1
+    if validatePawnMove(state,pawn,field[0],field[1]):
+        possibleState=placePawn(pawn,field,state)
+        states.append(possibleState)
+    field[1]-=2
+    if validatePawnMove(state,pawn,field[0],field[1]):
+        possibleState=placePawn(pawn,field,state)
+        states.append(possibleState)
+    field[0]+=1
+    field[1]-=1
+    if validatePawnMove(state,pawn,field[0],field[1]):
+        possibleState=placePawn(pawn,field,state)
+        states.append(possibleState)
+    field[1]+=4
+    if validatePawnMove(state,pawn,field[0],field[1]):
+        possibleState=placePawn(pawn,field,state)
+        states.append(possibleState)
+    field[0]+=1
+    field[1]-=1
+    if validatePawnMove(state,pawn,field[0],field[1]):
+        possibleState=placePawn(pawn,field,state)
+        states.append(possibleState)
+    field[1]-=2
+    if validatePawnMove(state,pawn,field[0],field[1]):
+        possibleState=placePawn(pawn,field,state)
+        states.append(possibleState)
+    field[0]+=1
+    field[1]+=1
+    if validatePawnMove(state,pawn,field[0],field[1]):
+        possibleState=placePawn(pawn,field,state)
+        states.append(possibleState)
+    return
+
+def pathHeuristics(origin: tuple, dest: tuple):
+    return int(math.sqrt((origin[0]-dest[0])**2 + (origin[1]-dest[1])**2)*10)
+
+def pathFind(state, startField: tuple, endField: tuple):
+    pawn=str()
+    if state[2]["X1"]==startField:
+        pawn="X1"
+    if state[2]["X2"]==startField:
+        pawn="X2"
+    if state[2]["O1"]==startField:
+        pawn="O1"
+    if state[2]["O2"]==startField:
+        pawn="O2"
+
+    start=copy.deepcopy(state)
+    end=copy.deepcopy(state)
+    end[2][pawn]=endField
+
+    found_end = False
+    open_set = set(start)
+    closed_set = set()
+    g = {}
+    prev_nodes = {}
+    g[start] = 0
+    prev_nodes[start] = None
+    while len(open_set) > 0 and (not found_end):
+        node = None
+        for next_node in open_set:
+            if node is None or g[next_node] + pathHeuristics(next_node[2][pawn],endField) < g[node] + pathHeuristics(node[2][pawn],endField):
+                node = next_node
+        if node[2][pawn] == endField:
+            found_end = True
+            break
+        for m in possibleMoves(state,pawn):
+            if m not in open_set and m not in closed_set:
+                open_set.add(m)
+                prev_nodes[m] = node
+                g[m] = g[node] + 20
+            else:
+                if g[m] > g[node] + 20:
+                    g[m] = g[node] + 20
+                    prev_nodes[m] = node
+                    if m in closed_set:
+                        closed_set.remove(m)
+                        open_set.add(m)
+        open_set.remove(node)
+        closed_set.add(node)
+    path = []
+    if found_end:
+        prev = end
+        while prev_nodes[prev] is not None:
+            path.append(prev)
+            prev = prev_nodes[prev]
+        path.append(start)
+        path.reverse()
+    return path
+
+def validateWallPlacement(state,color,x,y,isX):
+    potentialState=placeWall((x,y),color,state,isX)
+    if pathFind(potentialState,potentialState[2]["X1"],potentialState[1]["O1"]) and pathFind(potentialState,potentialState[2]["X1"],potentialState[1]["O2"]) and pathFind(potentialState,potentialState[2]["X2"],potentialState[1]["O1"]) and pathFind(potentialState,potentialState[2]["X2"],potentialState[1]["O2"]) and pathFind(potentialState,potentialState[2]["O1"],potentialState[1]["X1"]) and pathFind(potentialState,potentialState[2]["O1"],potentialState[1]["X2"]) and pathFind(potentialState,potentialState[2]["O2"],potentialState[1]["X1"]) and pathFind(potentialState,potentialState[2]["O2"],potentialState[1]["X2"]):
+        if isX:
+            if not (state[4][0][0]>0 and color=="Z") or (state[4][0][1]>0 and color=="P"):
+                return False
+        else:
+            if not (state[4][1][0]>0 and color=="Z") or (state[4][1][1]>0 and color=="P"):
+                return False
+        if not wallAt(state,"P",x,y) and not wallAt(state,"Z",x,y):
+            if color=="P":
+                if not wallAt(state,"P",x,y-1):
+                    return True
+            if color=="Z":
+                if not wallAt(state,"Z",x-1,y):
+                    return True
     return False
 
-state=([11, 14], {"X1": (2, 2), "X2": (4, 2), "O1": (2, 8), "O2": (6, 8)}, {"X1": (2, 3), "X2": (4, 6), "O1": (2, 8), "O2": (6, 10)}, {(0,0):"Z",(3,3):"Z",(6,6):"P"}, ([10, 10], [10, 10]))
-while gameParamInput() is not True:
-    next
+def placePawn(pawn: str,field : tuple, state):
+    newState=copy.deepcopy(state)
+    newState[2][pawn] = field
+    return newState
+
+def placeWall(wall : tuple, wallColor:str, state, isX: bool):
+    newState=copy.deepcopy(state)
+    if isX:
+        if wallColor=="Z":
+            newState[4][0][0]-=1
+        else:
+            newState[4][0][1]-=1
+    else:
+        if wallColor=="Z":
+            newState[4][1][0]-=1
+        else:
+            newState[4][1][1]-=1
+    newState[3][wall] = wallColor
+    return newState
+
+def game():
+    gameParamInput()
+    
+game()
