@@ -1,0 +1,15 @@
+FAZA II
+
+Dodate funkcije:
+    possibleMoves - vraca listu mogucih poteza iz date pozicije
+    pathHeuristics - funkcija heuristike za pathFind 
+    pathFind - astar algoritam trazenja
+    game - pokrece igru
+    printMarkedBoard - koristimo za debagiranje, nije znacajna za projekat
+
+Izmenjene funkcije:
+    playMove - zamenjena sa placePawn i placeWall
+    validateWallPlacement - dodata funkcionalnost za proveru puta do cilja
+    validatePawnMove - ispravljeni pojedini granicni slucajevi
+    startGame - dodat osnovni game loop za dva igraca
+    inputMove - ispravljen da omoguci odigravanje prvo pesaka pa zida

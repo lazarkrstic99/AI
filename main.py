@@ -8,7 +8,6 @@ reprezentacija stanja:
 import os
 import math
 import copy
-import time
 
 numberConversion=('1','2','3','4','5','6','7','8','9','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S')
 sampleState=([11, 14], {"X1": (2, 2), "X2": (4, 2), "O1": (2, 8), "O2": (6, 8)}, {"X1": (2, 3), "X2": (4, 6), "O1": (2, 8), "O2": (6, 10)}, {(0,0):"Z",(3,3):"Z",(6,6):"P"}, ([10, 10], [10, 10]))
@@ -234,7 +233,7 @@ def inputMove(state,isX):
         return newState
     except:
         print("Nevalidan unos!")
-        inputMove(state,isX)
+        return inputMove(state,isX)
 
 def startGame(x,y,brZidova,xx1,xy1,xx2,xy2,ox1,oy1,ox2,oy2,isAIFirst):
     state = tuple()
@@ -458,10 +457,10 @@ def validateWallPlacement(state,color,x,y,isX):
     potentialState=placeWall((x,y),color,state,isX)
     if pathFind(potentialState,potentialState[2]["X1"],potentialState[1]["O1"]) and pathFind(potentialState,potentialState[2]["X1"],potentialState[1]["O2"]) and pathFind(potentialState,potentialState[2]["X2"],potentialState[1]["O1"]) and pathFind(potentialState,potentialState[2]["X2"],potentialState[1]["O2"]) and pathFind(potentialState,potentialState[2]["O1"],potentialState[1]["X1"]) and pathFind(potentialState,potentialState[2]["O1"],potentialState[1]["X2"]) and pathFind(potentialState,potentialState[2]["O2"],potentialState[1]["X1"]) and pathFind(potentialState,potentialState[2]["O2"],potentialState[1]["X2"]):
         if isX:
-            if not (state[4][0][0]>0 and color=="Z") or (state[4][0][1]>0 and color=="P"):
+            if not ((state[4][0][0]>0 and color=="Z") or (state[4][0][1]>0 and color=="P")):
                 return False
         else:
-            if not (state[4][1][0]>0 and color=="Z") or (state[4][1][1]>0 and color=="P"):
+            if not ((state[4][1][0]>0 and color=="Z") or (state[4][1][1]>0 and color=="P")):
                 return False
         if not wallAt(state,"P",x,y) and not wallAt(state,"Z",x,y):
             if color=="P":
