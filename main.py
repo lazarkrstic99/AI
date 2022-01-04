@@ -13,7 +13,7 @@ numberConversion=('1','2','3','4','5','6','7','8','9','A','B','C','D','E','F','G
 sampleState=([11, 14], {"X1": (2, 2), "X2": (4, 2), "O1": (2, 8), "O2": (6, 8)}, {"X1": (2, 3), "X2": (4, 6), "O1": (2, 8), "O2": (6, 10)}, {(0,0):"Z",(3,3):"Z",(6,6):"P"}, ([10, 10], [10, 10]))
 
 def cls():
-    os.system('cls' if os.name=='nt' else 'clear')
+   ''' os.system('cls' if os.name=='nt' else 'clear')'''
 
 def isEnd(state):
 
@@ -249,14 +249,14 @@ def startGame(x,y,brZidova,xx1,xy1,xx2,xy2,ox1,oy1,ox2,oy2,isAIFirst):
                 return
 
             #AI/drugi igrac igra potez
-            state=inputMove(state,False)
+            state=minimax(state,1,isAIFirst)[0]
             printBoard(state)
         print(isEnd(state)," je pobednik!")
         return
     else:
         while not isEnd(state):
             #AI/drugi igrac igra potez
-            state=inputMove(state,True)
+            state=minimax(state,1,isAIFirst)[0]
             printBoard(state)
 
             if isEnd(state):
@@ -494,5 +494,115 @@ def placeWall(wall : tuple, wallColor:str, state, isX: bool):
 def game():
     gameParamInput()
     
+'''
+FAZA III
+'''
+def possibleWalls(state, isX):
+    walls=list()
+    if isX:
+        if state[4][0][0]>0:
+            #zeleni za X
+            for x in range(0,state[0][0]):
+                for y in range(0,state[0][0]):
+                    if validateWallPlacement(state,"Z",x,y,isX):
+                        walls.append(((x,y),"Z"))
+        if state[4][0][1]>0:
+            #P za X
+            for x in range(0,state[0][0]):
+                for y in range(0,state[0][0]):
+                    if validateWallPlacement(state,"P",x,y,isX):
+                        walls.append(((x,y),"P"))
+    else:
+        if state[4][1][0]>0:
+            #zeleni za O
+            for x in range(0,state[0][0]):
+                for y in range(0,state[0][0]):
+                    if validateWallPlacement(state,"Z",x,y,isX):
+                        walls.append(((x,y),"Z"))
+        if state[4][1][1]>0:
+            #P za O
+            for x in range(0,state[0][0]):
+                for y in range(0,state[0][0]):
+                    if validateWallPlacement(state,"P",x,y,isX):
+                        walls.append(((x,y),"P"))        
+    return walls
+
+def possibleStates(state, isX):
+    states=list()
+    if isX:
+        pawn1Moves=possibleMoves(state,"X1",state[2]["X1"])
+        pawn2Moves=possibleMoves(state,"X2",state[2]["X2"])
+        for move in pawn1Moves:
+            print(move)
+            tempState=copy.deepcopy(state)
+            walls=possibleWalls(placePawn("X1",move,tempState),isX)
+            for wall in walls:
+                #moguce da treba deepcopy ovamo
+                states.append(placeWall(wall[0],wall[1],tempState,isX))
+        for move in pawn2Moves:
+            print(move)
+            tempState=copy.deepcopy(state)
+            walls=possibleWalls(placePawn("X2",move,tempState),isX)
+            for wall in walls:
+                #moguce da treba deepcopy ovamo
+                states.append(placeWall(wall[0],wall[1],tempState,isX))
+    else:
+        pawn1Moves=possibleMoves(state,"O1",state[2]["O1"])
+        pawn2Moves=possibleMoves(state,"O2",state[2]["O2"])
+        for move in pawn1Moves:
+            print(move)
+            tempState=copy.deepcopy(state)
+            walls=possibleWalls(placePawn("O1",move,tempState),isX)
+            for wall in walls:
+                #moguce da treba deepcopy ovamo
+                states.append(placeWall(wall[0],wall[1],tempState,isX))
+        for move in pawn2Moves:
+            print(move)
+            tempState=copy.deepcopy(state)
+            walls=possibleWalls(placePawn("O2",move,tempState),isX)
+            for wall in walls:
+                #moguce da treba deepcopy ovamo
+                states.append(placeWall(wall[0],wall[1],tempState,isX))
+    return states
+
+def minimax(state, depth, isX):
+    alpha=(state,-500)
+    beta=(state,500)
+    #x je uvek max player
+    if isX:
+        return max_value(state, depth, alpha, beta)
+    else:
+        return min_value(state, depth, alpha, beta)
+
+def max_value(state, depth, alpha, beta):
+    if depth == 0:
+        return (state, evalState(state,True))
+    else:
+        for s in possibleStates(state,True):
+            alpha = max(alpha,min_value(s, depth - 1, alpha, beta),key=lambda x: x[1])
+            if alpha[1] >= beta[1]:
+                return beta
+    return alpha
+
+def min_value(state, depth, alpha, beta):
+    if depth == 0:
+        return (state, evalState(state,False))
+    else:
+        for s in possibleStates(state,False):
+            beta = min(beta,max_value(s, depth - 1, alpha, beta),key=lambda x: x[1])
+            if beta[1] <= alpha[1]:
+                return alpha
+    return beta
+
+'''
+FAZA IV
+'''
+
+def evalState(state,isX):
+    if isX:
+        return 150-min(pathHeuristics(state[2]["X1"],state[1]["O1"]),pathHeuristics(state[2]["X1"],state[1]["O2"]),pathHeuristics(state[2]["X2"],state[1]["O1"]),pathHeuristics(state[2]["X2"],state[1]["O2"]))
+    else:
+        return -150+min(pathHeuristics(state[2]["O1"],state[1]["X1"]),pathHeuristics(state[2]["O1"],state[1]["X2"]),pathHeuristics(state[2]["O2"],state[1]["X1"]),pathHeuristics(state[2]["O2"],state[1]["X2"]))
+
 
 game()
