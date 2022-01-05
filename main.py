@@ -14,7 +14,7 @@ sampleState=([11, 14], {"X1": (2, 2), "X2": (4, 2), "O1": (2, 8), "O2": (6, 8)},
 tempWalls=list()
 
 def cls():
-   ''' os.system('cls' if os.name=='nt' else 'clear')'''
+    os.system('cls' if os.name=='nt' else 'clear')
 
 def isEnd(state):
 
@@ -391,7 +391,7 @@ def connectedToWalls(state,wallPos,wallColor):
         if nPosition in state[3].keys() and state[3][nPosition]=="P":
             walls.append((nPosition,"P"))
 
-    elif wallColor=="Z":
+    elif wallColor=="P":
 
         nPosition=(wallPos[0],wallPos[1]-2)
         if nPosition in state[3].keys() and state[3][nPosition]=="P":
@@ -441,22 +441,29 @@ def checkEnclosure(state, wallPos, wallColor, path, enclosingWalls, pathConnecte
         path=list()
         path.append((wallPos,wallColor))
     nWalls=connectedToWalls(state,wallPos,wallColor)
-
+    '''
+    currWall=(wallPos,wallColor)
+    if currWall in path and currWall!=path[-1]:
+        #loop postoji
+        for w in range(path.index(currWall),len(path)):
+            if w not in enclosingWalls:
+                enclosingWalls.append(w)
+        return True
+    if pathConnected:
+        #put povezan sa krajem ili sa ogranicavajucim zidovima
+    '''
     for wall in nWalls:
-        if wall in path and path[-1]!=wall:
+        if wall in path and (wallPos,wallColor)!=wall:
             #loop zidova pronadjen
             enclosingWalls.append(path[path.index(wall):len(path)])
-            enclosingWalls.append(wall)
             return True
         if pathConnected:
             #put povezan sa krajem ili sa ogranicavajucim zidovima
             if wall in enclosingWalls:
                 enclosingWalls.append(path[path.index(wall):len(path)])
-                enclosingWalls.append(wall)
                 return True
             if isBorderConnected(state,wall[0],wall[1]):
                 enclosingWalls.append(path[path.index(wall):len(path)])
-                enclosingWalls.append(wall)
                 return True
 
     for wall in nWalls:
@@ -464,9 +471,13 @@ def checkEnclosure(state, wallPos, wallColor, path, enclosingWalls, pathConnecte
             if wall in enclosingWalls or isBorderConnected(state,wall[0],wall[1]):
                 path.append(wall)
                 inversePath=path[::-1]
-                return checkEnclosure(state,path[-1][0],path[-1][1],path,enclosingWalls,True)
+                if checkEnclosure(state,path[-1][0],path[-1][1],inversePath,enclosingWalls,True):
+                    return True
             else:
-                return checkEnclosure(state,wall[0],wall[1],path,enclosingWalls,pathConnected)
+                newPath=copy.deepcopy(path)
+                newPath.append(wall)
+                if checkEnclosure(state,wall[0],wall[1],newPath,enclosingWalls,pathConnected):
+                    return True
     return False
 
 
@@ -586,20 +597,21 @@ def validateWallPlacement(state,color,x,y,isX):
                 if color=="Z":
                     if not wallAt(state,"Z",x-1,y):
                         return True
+        return False
     else:
         if isX:
             if not ((state[4][0][0]>0 and color=="Z") or (state[4][0][1]>0 and color=="P")):
                 return False
-            else:
-                if not ((state[4][1][0]>0 and color=="Z") or (state[4][1][1]>0 and color=="P")):
-                    return False
-            if not wallAt(state,"P",x,y) and not wallAt(state,"Z",x,y):
-                if color=="P":
-                    if not wallAt(state,"P",x,y-1):
-                        return True
-                if color=="Z":
-                    if not wallAt(state,"Z",x-1,y):
-                        return True
+        else:
+            if not ((state[4][1][0]>0 and color=="Z") or (state[4][1][1]>0 and color=="P")):
+               return False
+        if not wallAt(state,"P",x,y) and not wallAt(state,"Z",x,y):
+            if color=="P":
+                if not wallAt(state,"P",x,y-1):
+                   return True
+            if color=="Z":
+                if not wallAt(state,"Z",x-1,y):
+                    return True
         
     return False
 
@@ -668,13 +680,15 @@ def possibleStates(state, isX):
         pawn2Moves=possibleMoves(state,"X2",state[2]["X2"])
         for move in pawn1Moves:
             tempState=copy.deepcopy(state)
-            walls=possibleWalls(placePawn("X1",move,tempState),isX)
+            tempState=placePawn("X1",move,tempState)
+            walls=possibleWalls(tempState,isX)
             for wall in walls:
                 #moguce da treba deepcopy ovamo
                 states.append(placeWall(wall[0],wall[1],tempState,isX))
         for move in pawn2Moves:
             tempState=copy.deepcopy(state)
-            walls=possibleWalls(placePawn("X2",move,tempState),isX)
+            tempState=placePawn("X2",move,tempState)
+            walls=possibleWalls(tempState,isX)
             for wall in walls:
                 #moguce da treba deepcopy ovamo
                 states.append(placeWall(wall[0],wall[1],tempState,isX))
@@ -683,13 +697,15 @@ def possibleStates(state, isX):
         pawn2Moves=possibleMoves(state,"O2",state[2]["O2"])
         for move in pawn1Moves:
             tempState=copy.deepcopy(state)
-            walls=possibleWalls(placePawn("O1",move,tempState),isX)
+            tempState=placePawn("O1",move,tempState)
+            walls=possibleWalls(tempState,isX)
             for wall in walls:
                 #moguce da treba deepcopy ovamo
                 states.append(placeWall(wall[0],wall[1],tempState,isX))
         for move in pawn2Moves:
             tempState=copy.deepcopy(state)
-            walls=possibleWalls(placePawn("O2",move,tempState),isX)
+            tempState=placePawn("O2",move,tempState)
+            walls=possibleWalls(tempState,isX)
             for wall in walls:
                 #moguce da treba deepcopy ovamo
                 states.append(placeWall(wall[0],wall[1],tempState,isX))
