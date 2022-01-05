@@ -11,6 +11,7 @@ import copy
 
 numberConversion=('1','2','3','4','5','6','7','8','9','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S')
 sampleState=([11, 14], {"X1": (2, 2), "X2": (4, 2), "O1": (2, 8), "O2": (6, 8)}, {"X1": (2, 3), "X2": (4, 6), "O1": (2, 8), "O2": (6, 10)}, {(0,0):"Z",(3,3):"Z",(6,6):"P"}, ([10, 10], [10, 10]))
+tempWalls=list()
 
 def cls():
    ''' os.system('cls' if os.name=='nt' else 'clear')'''
@@ -354,6 +355,121 @@ def validatePawnMove(state,pawn,x,y):
 '''
 FAZA II
 '''
+def connectedToWalls(state,wallPos,wallColor):
+    walls=list()
+    if wallColor=="Z":
+
+        nPosition=(wallPos[0]-2,wallPos[1])
+        if nPosition in state[3].keys() and state[3][nPosition]=="Z":
+            walls.append((nPosition,"Z"))
+
+        nPosition=(wallPos[0]+2,wallPos[1])
+        if nPosition in state[3].keys() and state[3][nPosition]=="Z":
+            walls.append((nPosition,"Z"))
+            
+        nPosition=(wallPos[0]-1,wallPos[1]-1)
+        if nPosition in state[3].keys() and state[3][nPosition]=="P":
+            walls.append((nPosition,"P"))
+                    
+        nPosition=(wallPos[0]-1,wallPos[1])
+        if nPosition in state[3].keys() and state[3][nPosition]=="P":
+            walls.append((nPosition,"P"))
+                    
+        nPosition=(wallPos[0]-1,wallPos[1]+1)
+        if nPosition in state[3].keys() and state[3][nPosition]=="P":
+            walls.append((nPosition,"P"))
+                    
+        nPosition=(wallPos[0]+1,wallPos[1]-1)
+        if nPosition in state[3].keys() and state[3][nPosition]=="P":
+            walls.append((nPosition,"P"))
+                    
+        nPosition=(wallPos[0]+1,wallPos[1])
+        if nPosition in state[3].keys() and state[3][nPosition]=="P":
+            walls.append((nPosition,"P"))
+                    
+        nPosition=(wallPos[0]+1,wallPos[1]+1)
+        if nPosition in state[3].keys() and state[3][nPosition]=="P":
+            walls.append((nPosition,"P"))
+
+    elif wallColor=="Z":
+
+        nPosition=(wallPos[0],wallPos[1]-2)
+        if nPosition in state[3].keys() and state[3][nPosition]=="P":
+            walls.append((nPosition,"P"))
+
+        nPosition=(wallPos[0],wallPos[1]+2)
+        if nPosition in state[3].keys() and state[3][nPosition]=="P":
+            walls.append((nPosition,"P"))
+
+        nPosition=(wallPos[0]-1,wallPos[1]-1)
+        if nPosition in state[3].keys() and state[3][nPosition]=="Z":
+            walls.append((nPosition,"Z"))
+
+        nPosition=(wallPos[0],wallPos[1]-1)
+        if nPosition in state[3].keys() and state[3][nPosition]=="Z":
+            walls.append((nPosition,"Z"))
+        
+        nPosition=(wallPos[0]+1,wallPos[1]-1)
+        if nPosition in state[3].keys() and state[3][nPosition]=="Z":
+            walls.append((nPosition,"Z"))
+        
+        nPosition=(wallPos[0]-1,wallPos[1]+1)
+        if nPosition in state[3].keys() and state[3][nPosition]=="Z":
+            walls.append((nPosition,"Z"))
+        
+        nPosition=(wallPos[0],wallPos[1]+1)
+        if nPosition in state[3].keys() and state[3][nPosition]=="Z":
+            walls.append((nPosition,"Z"))
+        
+        nPosition=(wallPos[0]+1,wallPos[1]+1)
+        if nPosition in state[3].keys() and state[3][nPosition]=="Z":
+            walls.append((nPosition,"Z"))
+    
+    return walls
+
+def isBorderConnected(state,wallPos,wallColor):
+    if wallColor=="Z":
+        if wallPos[0]==0 or wallPos[0]==state[0][0]-2:
+            return True
+    elif wallColor=="P":
+        if wallPos[1]==0 or wallPos[1]==state[0][1]-2:
+            return True
+    return False
+
+def checkEnclosure(state, wallPos, wallColor, path, enclosingWalls, pathConnected):
+    if not path:
+        path=list()
+        path.append((wallPos,wallColor))
+    nWalls=connectedToWalls(state,wallPos,wallColor)
+
+    for wall in nWalls:
+        if wall in path and path[-1]!=wall:
+            #loop zidova pronadjen
+            enclosingWalls.append(path[path.index(wall):len(path)])
+            enclosingWalls.append(wall)
+            return True
+        if pathConnected:
+            #put povezan sa krajem ili sa ogranicavajucim zidovima
+            if wall in enclosingWalls:
+                enclosingWalls.append(path[path.index(wall):len(path)])
+                enclosingWalls.append(wall)
+                return True
+            if isBorderConnected(state,wall[0],wall[1]):
+                enclosingWalls.append(path[path.index(wall):len(path)])
+                enclosingWalls.append(wall)
+                return True
+
+    for wall in nWalls:
+        if wall not in path:
+            if wall in enclosingWalls or isBorderConnected(state,wall[0],wall[1]):
+                path.append(wall)
+                inversePath=path[::-1]
+                return checkEnclosure(state,path[-1][0],path[-1][1],path,enclosingWalls,True)
+            else:
+                return checkEnclosure(state,wall[0],wall[1],path,enclosingWalls,pathConnected)
+    return False
+
+
 def possibleMoves(state,pawn,position):
     fields=list()
     tmpState=copy.deepcopy(state)
@@ -455,20 +571,36 @@ def pathFind(state, start: tuple, end: tuple):
 
 def validateWallPlacement(state,color,x,y,isX):
     potentialState=placeWall((x,y),color,state,isX)
-    if pathFind(potentialState,potentialState[2]["X1"],potentialState[1]["O1"]) and pathFind(potentialState,potentialState[2]["X1"],potentialState[1]["O2"]) and pathFind(potentialState,potentialState[2]["X2"],potentialState[1]["O1"]) and pathFind(potentialState,potentialState[2]["X2"],potentialState[1]["O2"]) and pathFind(potentialState,potentialState[2]["O1"],potentialState[1]["X1"]) and pathFind(potentialState,potentialState[2]["O1"],potentialState[1]["X2"]) and pathFind(potentialState,potentialState[2]["O2"],potentialState[1]["X1"]) and pathFind(potentialState,potentialState[2]["O2"],potentialState[1]["X2"]):
+    if checkEnclosure(potentialState,(x,y),color,False,tempWalls,isBorderConnected(potentialState,(x,y),color)):
+        if pathFind(potentialState,potentialState[2]["X1"],potentialState[1]["O1"]) and pathFind(potentialState,potentialState[2]["X1"],potentialState[1]["O2"]) and pathFind(potentialState,potentialState[2]["X2"],potentialState[1]["O1"]) and pathFind(potentialState,potentialState[2]["X2"],potentialState[1]["O2"]) and pathFind(potentialState,potentialState[2]["O1"],potentialState[1]["X1"]) and pathFind(potentialState,potentialState[2]["O1"],potentialState[1]["X2"]) and pathFind(potentialState,potentialState[2]["O2"],potentialState[1]["X1"]) and pathFind(potentialState,potentialState[2]["O2"],potentialState[1]["X2"]):
+            if isX:
+                if not ((state[4][0][0]>0 and color=="Z") or (state[4][0][1]>0 and color=="P")):
+                    return False
+            else:
+                if not ((state[4][1][0]>0 and color=="Z") or (state[4][1][1]>0 and color=="P")):
+                    return False
+            if not wallAt(state,"P",x,y) and not wallAt(state,"Z",x,y):
+                if color=="P":
+                    if not wallAt(state,"P",x,y-1):
+                        return True
+                if color=="Z":
+                    if not wallAt(state,"Z",x-1,y):
+                        return True
+    else:
         if isX:
             if not ((state[4][0][0]>0 and color=="Z") or (state[4][0][1]>0 and color=="P")):
                 return False
-        else:
-            if not ((state[4][1][0]>0 and color=="Z") or (state[4][1][1]>0 and color=="P")):
-                return False
-        if not wallAt(state,"P",x,y) and not wallAt(state,"Z",x,y):
-            if color=="P":
-                if not wallAt(state,"P",x,y-1):
-                    return True
-            if color=="Z":
-                if not wallAt(state,"Z",x-1,y):
-                    return True
+            else:
+                if not ((state[4][1][0]>0 and color=="Z") or (state[4][1][1]>0 and color=="P")):
+                    return False
+            if not wallAt(state,"P",x,y) and not wallAt(state,"Z",x,y):
+                if color=="P":
+                    if not wallAt(state,"P",x,y-1):
+                        return True
+                if color=="Z":
+                    if not wallAt(state,"Z",x-1,y):
+                        return True
+        
     return False
 
 def placePawn(pawn: str,field : tuple, state):
@@ -494,6 +626,8 @@ def placeWall(wall : tuple, wallColor:str, state, isX: bool):
 def game():
     gameParamInput()
     
+
+
 '''
 FAZA III
 '''
@@ -533,14 +667,12 @@ def possibleStates(state, isX):
         pawn1Moves=possibleMoves(state,"X1",state[2]["X1"])
         pawn2Moves=possibleMoves(state,"X2",state[2]["X2"])
         for move in pawn1Moves:
-            print(move)
             tempState=copy.deepcopy(state)
             walls=possibleWalls(placePawn("X1",move,tempState),isX)
             for wall in walls:
                 #moguce da treba deepcopy ovamo
                 states.append(placeWall(wall[0],wall[1],tempState,isX))
         for move in pawn2Moves:
-            print(move)
             tempState=copy.deepcopy(state)
             walls=possibleWalls(placePawn("X2",move,tempState),isX)
             for wall in walls:
@@ -550,14 +682,12 @@ def possibleStates(state, isX):
         pawn1Moves=possibleMoves(state,"O1",state[2]["O1"])
         pawn2Moves=possibleMoves(state,"O2",state[2]["O2"])
         for move in pawn1Moves:
-            print(move)
             tempState=copy.deepcopy(state)
             walls=possibleWalls(placePawn("O1",move,tempState),isX)
             for wall in walls:
                 #moguce da treba deepcopy ovamo
                 states.append(placeWall(wall[0],wall[1],tempState,isX))
         for move in pawn2Moves:
-            print(move)
             tempState=copy.deepcopy(state)
             walls=possibleWalls(placePawn("O2",move,tempState),isX)
             for wall in walls:
