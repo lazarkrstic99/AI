@@ -1,0 +1,11 @@
+nove funkcije:
+    def possibleWalls(state, isX) - vraca moguce poteze zidova
+    def possibleStates(state, isX) - generise moguca stanja
+    def minimax(state, depth, isX) - minimax algoritam
+    def max_value(state, depth, alpha, beta)
+    def min_value(state, depth, alpha, beta)
+    def connectedToWalls(state,wallPos,wallColor) - vraca povezane zidove sa prosledjenim
+    def isBorderConnected(state,wallPos,wallColor) - provera da li je zid uz ivicu
+    def checkEnclosure(state, wallPos, wallColor, path, enclosingWalls, pathConnected) - vraca true ako postoji nov zatvoren prostor
+Izmene:
+    def validateWallPlacement(state,color,x,y,isX) - izmenjena da ne koristi trazenje svaki put, koristi checkEnclosure
