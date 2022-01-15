@@ -375,7 +375,7 @@ def validatePawnMove(state,pawn,x,y):
                 return True
     elif(state[2][pawn][0]==x and state[2][pawn][1]-1==y):
         #desno 1
-        if not (wallAt(state,"Z",state[2][pawn][0],state[2][pawn][1]) or wallAt(state,"Z",state[2][pawn][0],state[2][pawn][1]-1)):
+        if not (wallAt(state,"Z",state[2][pawn][0],state[2][pawn][1]) or wallAt(state,"Z",state[2][pawn][0]-1,state[2][pawn][1])):
             if pawnAt(state, x,y+1)  or ((pawn=="X1" or pawn=="X2") and (state[1]["O1"]==(x,y) or state[1]["O2"]==(x,y))) or ((pawn=="O1" or pawn=="O2")and (state[1]["X1"]==(x,y) or state[1]["X2"]==(x,y))):
                 return True
     elif(state[2][pawn][0]==x and state[2][pawn][1]+1==y):
