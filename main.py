@@ -12,7 +12,7 @@ import bisect
 import threading
 
 numberConversion=('1','2','3','4','5','6','7','8','9','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S')
-sampleState=([11, 14], {"X1": (4, 4), "X2": (4, 2), "O1": (2, 8), "O2": (6, 8)}, {"X1": (1, 3), "X2": (4, 6), "O1": (2, 8), "O2": (6, 10)}, {(3,0):"P",(0,3):"Z",(0,1):"Z",(2,2):"Z",(4,4):"P"}, ([10, 10], [10, 10]))
+sampleState=([11, 14], {"X1": (3, 3), "X2": (7, 3), "O1": (3, 10), "O2": (7, 10)}, {"X1": (0, 0), "X2": (10, 0), "O1": (0, 13), "O2": (10, 13)}, {(3,2):"Z",(5,1):"Z",(5,2):"Z",(3,3):"Z",(2,3):"P",(6,3):"P",(7,3):"P",(6,4):"Z",(3,9):"Z",(6,9):"Z",(2,10):"P",(7,10):"P"}, ([0, 0], [0, 0]),{"X1": {"O1":[],"O2":[]}, "X2": {"O1":[],"O2":[]}, "O1": {"X1":[],"X2":[]}, "O2": {"X1":[],"X2":[]}})
 
 def cls():
     os.system('cls' if os.name=='nt' else 'clear')
@@ -166,7 +166,7 @@ def printMarkedBoard(state, marks):
         print(printWall)
 
 def printBoard(state):
-    #cls()
+    cls()
     printval="  "
     for i in range(0,state[0][1]):
         printval+=str(numberConversion[i])
@@ -256,14 +256,8 @@ def startGame(x,y,brZidova,xx1,xy1,xx2,xy2,ox1,oy1,ox2,oy2,isAIFirst):
     minimaxDepth=3
     state = tuple()
     state = ([x, y], {"X1": (xx1, xy1), "X2": (xx2, xy2), "O1": (ox1, oy1), "O2": (ox2, oy2)}, {"X1": (xx1, xy1), "X2": (xx2, xy2), "O1": (ox1, oy1), "O2": (ox2, oy2)}, {}, ([brZidova, brZidova], [brZidova, brZidova]),{"X1": {"O1":[],"O2":[]}, "X2": {"O1":[],"O2":[]}, "O1": {"X1":[],"X2":[]}, "O2": {"X1":[],"X2":[]}})
-    state[5]["X1"]["O1"]=[0,pathFind(state,state[2]["X1"],state[1]["O1"])[1:]]
-    state[5]["X1"]["O2"]=[0,pathFind(state,state[2]["X1"],state[1]["O2"])[1:]]
-    state[5]["X2"]["O1"]=[0,pathFind(state,state[2]["X2"],state[1]["O1"])[1:]]
-    state[5]["X2"]["O2"]=[0,pathFind(state,state[2]["X2"],state[1]["O2"])[1:]]
-    state[5]["O1"]["X1"]=[0,pathFind(state,state[2]["O1"],state[1]["X1"])[1:]]
-    state[5]["O1"]["X2"]=[0,pathFind(state,state[2]["O1"],state[1]["X2"])[1:]]
-    state[5]["O2"]["X1"]=[0,pathFind(state,state[2]["O2"],state[1]["X1"])[1:]]
-    state[5]["O2"]["X2"]=[0,pathFind(state,state[2]["O2"],state[1]["X2"])[1:]]
+    #state=sampleState
+    state=recalculatePaths(state)
     print(len(possibleStates(state,True)))
     printBoard(state)
     if not isAIFirst:
@@ -278,7 +272,6 @@ def startGame(x,y,brZidova,xx1,xy1,xx2,xy2,ox1,oy1,ox2,oy2,isAIFirst):
             #AI/drugi igrac igra potez
             state=minimax(state,minimaxDepth,isAIFirst)[0]
             printBoard(state)
-            print(evalState(state,False))
 
         print(isEnd(state)," je pobednik!")
         return
@@ -287,16 +280,14 @@ def startGame(x,y,brZidova,xx1,xy1,xx2,xy2,ox1,oy1,ox2,oy2,isAIFirst):
             #AI/drugi igrac igra potez
             state=minimax(state,minimaxDepth,isAIFirst)[0]
             printBoard(state)
-            print(evalState(state,True))
 
             if isEnd(state):
                 print(isEnd(state)," je pobednik!")
                 return
             
-            #state=inputMove(state,False)
-            state=minimax(state,minimaxDepth,not isAIFirst)[0]
+            state=inputMove(state,False)
+            #state=minimax(state,minimaxDepth,not isAIFirst)[0]
             printBoard(state)
-            print(evalState(state,False))
         print(isEnd(state)," je pobednik!")
         return
 
@@ -341,13 +332,13 @@ def validatePawnMove(state,pawn,x,y):
 
     elif(state[2][pawn][0]+1==x and state[2][pawn][1]+1==y):
         #dole desno
-        if not (wallAt(state,"Z",state[2][pawn][0],state[2][pawn][1]) or wallAt(state,"P",state[2][pawn][0],state[2][pawn][1]) or (wallAt(state,"Z",state[2][pawn][0]-1,state[2][pawn][1]) and wallAt(state,"P",state[2][pawn][0],state[2][pawn][1]-1)) or (wallAt(state,"Z",state[2][pawn][0]+1,state[2][pawn][1]) and wallAt(state,"P",state[2][pawn][0],state[2][pawn][1]+1))or (wallAt(state,"Z",state[2][pawn][0]-1,state[2][pawn][1]-1) and wallAt(state,"Z",state[2][pawn][0]+1,state[2][pawn][1])-1) or (wallAt(state,"P",state[2][pawn][0],state[2][pawn][1]-2) and wallAt(state,"P",state[2][pawn][0],state[2][pawn][1]))):
+        if not (wallAt(state,"Z",state[2][pawn][0],state[2][pawn][1]) or wallAt(state,"P",state[2][pawn][0],state[2][pawn][1]) or (wallAt(state,"Z",state[2][pawn][0]-1,state[2][pawn][1]) and wallAt(state,"P",state[2][pawn][0],state[2][pawn][1]-1)) or (wallAt(state,"Z",state[2][pawn][0]+1,state[2][pawn][1]) and wallAt(state,"P",state[2][pawn][0],state[2][pawn][1]+1))or (wallAt(state,"Z",state[2][pawn][0]-1,state[2][pawn][1]) and wallAt(state,"Z",state[2][pawn][0]+1,state[2][pawn][1])) or (wallAt(state,"P",state[2][pawn][0],state[2][pawn][1]-2) and wallAt(state,"P",state[2][pawn][0],state[2][pawn][1]))):
             if not pawnAt(state, x,y) or ((pawn=="X1" or pawn=="X2") and (state[1]["O1"]==(x,y) or state[1]["O2"]==(x,y))) or ((pawn=="O1" or pawn=="O2")and (state[1]["X1"]==(x,y) or state[1]["X2"]==(x,y))):
                 return True
 
     elif(state[2][pawn][0]+1==x and state[2][pawn][1]-1==y):
         #dole levo
-        if not (wallAt(state,"Z",state[2][pawn][0],state[2][pawn][1]-1) or wallAt(state,"P",state[2][pawn][0],state[2][pawn][1]-1) or (wallAt(state,"Z",state[2][pawn][0]-1,state[2][pawn][1]-1) and wallAt(state,"P",state[2][pawn][0],state[2][pawn][1]-2)) or (wallAt(state,"Z",state[2][pawn][0]+1,state[2][pawn][1]-1) and wallAt(state,"P",state[2][pawn][0],state[2][pawn][1]-2))or (wallAt(state,"Z",state[2][pawn][0]-1,state[2][pawn][1]) and wallAt(state,"Z",state[2][pawn][0]+1,state[2][pawn][1])) or (wallAt(state,"P",state[2][pawn][0],state[2][pawn][1]-1) and wallAt(state,"P",state[2][pawn][0],state[2][pawn][1]+1))):
+        if not (wallAt(state,"Z",state[2][pawn][0],state[2][pawn][1]-1) or wallAt(state,"P",state[2][pawn][0],state[2][pawn][1]-1) or (wallAt(state,"Z",state[2][pawn][0]-1,state[2][pawn][1]-1) and wallAt(state,"P",state[2][pawn][0],state[2][pawn][1]-2)) or (wallAt(state,"Z",state[2][pawn][0]+1,state[2][pawn][1]-1) and wallAt(state,"P",state[2][pawn][0],state[2][pawn][1]-2))or (wallAt(state,"Z",state[2][pawn][0]-1,state[2][pawn][1]-1) and wallAt(state,"Z",state[2][pawn][0]+1,state[2][pawn][1])-1) or (wallAt(state,"P",state[2][pawn][0],state[2][pawn][1]-2) and wallAt(state,"P",state[2][pawn][0],state[2][pawn][1]))):
             if not pawnAt(state, x,y) or ((pawn=="X1" or pawn=="X2") and (state[1]["O1"]==(x,y) or state[1]["O2"]==(x,y))) or ((pawn=="O1" or pawn=="O2")and (state[1]["X1"]==(x,y) or state[1]["X2"]==(x,y))):
                 return True
 
@@ -359,26 +350,26 @@ def validatePawnMove(state,pawn,x,y):
 
     elif(state[2][pawn][0]-1==x and state[2][pawn][1]-1==y):
         #gore levo
-        if not (wallAt(state,"Z",state[2][pawn][0]-1,state[2][pawn][1]-1) or wallAt(state,"P",state[2][pawn][0]-1,state[2][pawn][1]-1) or (wallAt(state,"Z",state[2][pawn][0]-1,state[2][pawn][1]) and wallAt(state,"P",state[2][pawn][0]-1,state[2][pawn][1])) or (wallAt(state,"Z",state[2][pawn][0]-1,state[2][pawn][1]-2) and wallAt(state,"P",state[2][pawn][0]-1,state[2][pawn][1]-2)) or (wallAt(state,"Z",state[2][pawn][0]-2,state[2][pawn][1]-1) and wallAt(state,"Z",state[2][pawn][0],state[2][pawn][1]-1))or (wallAt(state,"P",state[2][pawn][0]-1,state[2][pawn][1]-2) and wallAt(state,"P",state[2][pawn][0]-1,state[2][pawn][1]))):
+        if not (wallAt(state,"Z",state[2][pawn][0]-1,state[2][pawn][1]-1) or wallAt(state,"P",state[2][pawn][0]-1,state[2][pawn][1]-1) or (wallAt(state,"Z",state[2][pawn][0],state[2][pawn][1]-1) and wallAt(state,"P",state[2][pawn][0]-1,state[2][pawn][1])) or (wallAt(state,"Z",state[2][pawn][0]-2,state[2][pawn][1]-1) and wallAt(state,"P",state[2][pawn][0]-1,state[2][pawn][1]-2)) or (wallAt(state,"Z",state[2][pawn][0]-2,state[2][pawn][1]-1) and wallAt(state,"Z",state[2][pawn][0],state[2][pawn][1]-1))or (wallAt(state,"P",state[2][pawn][0]-1,state[2][pawn][1]-2) and wallAt(state,"P",state[2][pawn][0]-1,state[2][pawn][1]))):
             if not pawnAt(state, x,y) or ((pawn=="X1" or pawn=="X2") and (state[1]["O1"]==(x,y) or state[1]["O2"]==(x,y))) or ((pawn=="O1" or pawn=="O2")and (state[1]["X1"]==(x,y) or state[1]["X2"]==(x,y))):
                 return True
 
     elif(state[2][pawn][0]-1==x and state[2][pawn][1]==y):
         #gore1
         if not (wallAt(state,"P",state[2][pawn][0]-1,state[2][pawn][1]) or wallAt(state,"P",state[2][pawn][0]-1,state[2][pawn][1]-1)):
-            if pawnAt(state, x+1,y)  or ((pawn=="X1" or pawn=="X2") and (state[1]["O1"]==(x,y) or state[1]["O2"]==(x,y))) or ((pawn=="O1" or pawn=="O2")and (state[1]["X1"]==(x,y) or state[1]["X2"]==(x,y))):
+            if pawnAt(state, x-1,y)  or ((pawn=="X1" or pawn=="X2") and (state[1]["O1"]==(x,y) or state[1]["O2"]==(x,y))) or ((pawn=="O1" or pawn=="O2")and (state[1]["X1"]==(x,y) or state[1]["X2"]==(x,y))):
                 return True
     elif(state[2][pawn][0]+1==x and state[2][pawn][1]==y):
         #dole1
         if not (wallAt(state,"P",state[2][pawn][0],state[2][pawn][1]) or wallAt(state,"P",state[2][pawn][0],state[2][pawn][1]-1)):
-            if pawnAt(state, x-1,y) or ((pawn=="X1" or pawn=="X2") and (state[1]["O1"]==(x,y) or state[1]["O2"]==(x,y))) or ((pawn=="O1" or pawn=="O2")and (state[1]["X1"]==(x,y) or state[1]["X2"]==(x,y))) :
+            if pawnAt(state, x+1,y) or ((pawn=="X1" or pawn=="X2") and (state[1]["O1"]==(x,y) or state[1]["O2"]==(x,y))) or ((pawn=="O1" or pawn=="O2")and (state[1]["X1"]==(x,y) or state[1]["X2"]==(x,y))) :
                 return True
-    elif(state[2][pawn][0]==x and state[2][pawn][1]-1==y):
+    elif(state[2][pawn][0]==x and state[2][pawn][1]+1==y):
         #desno 1
         if not (wallAt(state,"Z",state[2][pawn][0],state[2][pawn][1]) or wallAt(state,"Z",state[2][pawn][0]-1,state[2][pawn][1])):
             if pawnAt(state, x,y+1)  or ((pawn=="X1" or pawn=="X2") and (state[1]["O1"]==(x,y) or state[1]["O2"]==(x,y))) or ((pawn=="O1" or pawn=="O2")and (state[1]["X1"]==(x,y) or state[1]["X2"]==(x,y))):
                 return True
-    elif(state[2][pawn][0]==x and state[2][pawn][1]+1==y):
+    elif(state[2][pawn][0]==x and state[2][pawn][1]-1==y):
         #levo 1
         if not (wallAt(state,"Z",state[2][pawn][0],state[2][pawn][1]-1)  or wallAt(state,"Z",state[2][pawn][0]-1,state[2][pawn][1]-1)):
             if pawnAt(state, x,y-1)  or ((pawn=="X1" or pawn=="X2") and (state[1]["O1"]==(x,y) or state[1]["O2"]==(x,y))) or ((pawn=="O1" or pawn=="O2")and (state[1]["X1"]==(x,y) or state[1]["X2"]==(x,y))):
@@ -489,7 +480,12 @@ def checkEnclosure(state, wallPos, wallColor, path, pathConnected):
     if not path:
         path=list()
         path.append((wallPos,wallColor))
-    nWalls=connectedToWalls(state,wallPos,wallColor)
+        tmpState=placeWall(wallPos,wallColor,state,False)
+        if not tmpState:
+            tmpState=placeWall(wallPos,wallColor,state,True)
+    else:
+        tmpState=state
+    nWalls=connectedToWalls(tmpState,wallPos,wallColor)
 
     for wall in nWalls:
         if wall == path[0] and len(path)>3:
@@ -497,21 +493,21 @@ def checkEnclosure(state, wallPos, wallColor, path, pathConnected):
             return True
         if pathConnected and not wall == path[0]:
             #put povezan sa krajem ili sa ogranicavajucim zidovima
-            if isBorderConnected(state,wall[0],wall[1]):
+            if isBorderConnected(tmpState,wall[0],wall[1]):
                 return True
 
     for wall in nWalls:
-        if wall not in path:
-            if isBorderConnected(state,wall[0],wall[1]):
+        if wall not in path and (len(path)<2 or wall not in connectedToWalls(tmpState,path[-2][0],path[-2][1])):
+            if isBorderConnected(tmpState,wall[0],wall[1]):
                 newPath=copy.deepcopy(path)
                 newPath.append(wall)
                 inversePath=newPath[::-1]
-                if checkEnclosure(state,path[-1][0],path[-1][1],inversePath,True):
+                if checkEnclosure(tmpState,path[-1][0],path[-1][1],inversePath,True):
                     return True
             else:
                 newPath=copy.deepcopy(path)
                 newPath.append(wall)
-                if checkEnclosure(state,wall[0],wall[1],newPath,pathConnected):
+                if checkEnclosure(tmpState,wall[0],wall[1],newPath,pathConnected):
                     return True
     return False
 
@@ -614,6 +610,28 @@ def pathFind(state, start: tuple, end: tuple):
         path.append(start)
         path.reverse()
     return path
+
+def recalculatePaths(oldState):
+    state=copy.deepcopy(oldState)
+    if state[5]["X1"]["O1"] and state[5]["X1"]["O1"][0]!=-1:
+        state[5]["X1"]["O1"]=[-1,pathFind(state,state[2]["X1"],state[1]["O1"])[1:]]
+        state[5]["X1"]["O2"]=[-1,pathFind(state,state[2]["X1"],state[1]["O2"])[1:]]
+        state[5]["X2"]["O1"]=[-1,pathFind(state,state[2]["X2"],state[1]["O1"])[1:]]
+        state[5]["X2"]["O2"]=[-1,pathFind(state,state[2]["X2"],state[1]["O2"])[1:]]
+        state[5]["O1"]["X1"]=[-1,pathFind(state,state[2]["O1"],state[1]["X1"])[1:]]
+        state[5]["O1"]["X2"]=[-1,pathFind(state,state[2]["O1"],state[1]["X2"])[1:]]
+        state[5]["O2"]["X1"]=[-1,pathFind(state,state[2]["O2"],state[1]["X1"])[1:]]
+        state[5]["O2"]["X2"]=[-1,pathFind(state,state[2]["O2"],state[1]["X2"])[1:]]
+    else:
+        state[5]["X1"]["O1"]=[0,pathFind(state,state[2]["X1"],state[1]["O1"])[1:]]
+        state[5]["X1"]["O2"]=[0,pathFind(state,state[2]["X1"],state[1]["O2"])[1:]]
+        state[5]["X2"]["O1"]=[0,pathFind(state,state[2]["X2"],state[1]["O1"])[1:]]
+        state[5]["X2"]["O2"]=[0,pathFind(state,state[2]["X2"],state[1]["O2"])[1:]]
+        state[5]["O1"]["X1"]=[0,pathFind(state,state[2]["O1"],state[1]["X1"])[1:]]
+        state[5]["O1"]["X2"]=[0,pathFind(state,state[2]["O1"],state[1]["X2"])[1:]]
+        state[5]["O2"]["X1"]=[0,pathFind(state,state[2]["O2"],state[1]["X1"])[1:]]
+        state[5]["O2"]["X2"]=[0,pathFind(state,state[2]["O2"],state[1]["X2"])[1:]]
+    return state
 
 def validateWallPlacement(state,color,x,y,isX):
     
@@ -722,10 +740,12 @@ def possibleWalls(state, isX):
                     positions.add((pos[0]+x,pos[1]+y))
 
     for pos in positions:
-        if validateWallPlacement(state,"Z",pos[0],pos[1],isX):
-            walls.append(((pos[0],pos[1]),"Z"))
-        if validateWallPlacement(state,"P",pos[0],pos[1],isX):
-            walls.append(((pos[0],pos[1]),"P"))
+        if not checkEnclosure(state,pos,"Z",False,isBorderConnected(state,pos,"Z")):
+            if validateWallPlacement(state,"Z",pos[0],pos[1],isX):
+                walls.append(((pos[0],pos[1]),"Z"))
+        if not checkEnclosure(state,pos,"P",False,isBorderConnected(state,pos,"P")):
+            if validateWallPlacement(state,"P",pos[0],pos[1],isX):
+                walls.append(((pos[0],pos[1]),"P"))
             
     return walls
 
@@ -746,6 +766,8 @@ def possibleStates(state, isX):
     states=list()
     threads=list()
     walls=possibleWalls(state,isX)
+    if(state[4][0][0]+state[4][0][1]+state[4][1][0]+state[4][1][1])==0:
+        pawnCount=16
     if isX:
         moves=list()
         pawn1Moves=possibleMoves(state,"X1",state[2]["X1"])
@@ -815,6 +837,8 @@ def possibleStates(state, isX):
     return retVal
 
 def minimax(state, depth, isX):
+    if(state[4][0][0]+state[4][0][1]+state[4][1][0]+state[4][1][1])==0:
+        state=recalculatePaths(state)
     alpha=(state,-math.inf)
     beta=(state,math.inf)
     #x je uvek max player
@@ -857,24 +881,27 @@ FAZA IV
 def generateStates(state,move,count,walls,pawn,isX,states,bestValues):
     tempState=copy.deepcopy(state)
     tempState=placePawn(pawn,move,tempState)
-    #walls=possibleWalls(tempState,isX)
-    for wall in walls:
-        eval=evalState(placeWall(wall[0],wall[1],tempState,isX),isX)
-        #moguce da treba deepcopy ovamo
-        if len(states)>count-1:
-            if isX:
-                if eval>bestValues[0]:
-                    bisect.insort(bestValues,eval)
-                    bestValues=bestValues[1:]
-                    states.append((placeWall(wall[0],wall[1],tempState,isX),eval))
+    if walls:
+        for wall in walls:
+            eval=evalState(placeWall(wall[0],wall[1],tempState,isX),isX)
+            if len(states)>count-1:
+                if isX:
+                    if eval>bestValues[0]:
+                        bisect.insort(bestValues,eval)
+                        bestValues=bestValues[1:]
+                        states.append((placeWall(wall[0],wall[1],tempState,isX),eval))
+                else:
+                    if eval<bestValues[-1]:
+                        bisect.insort(bestValues,eval)
+                        bestValues=bestValues[:-1]
+                        states.append((placeWall(wall[0],wall[1],tempState,isX),eval))
             else:
-                if eval<bestValues[-1]:
-                    bisect.insort(bestValues,eval)
-                    bestValues=bestValues[:-1]
-                    states.append((placeWall(wall[0],wall[1],tempState,isX),eval))
-        else:
-            bisect.insort(bestValues,eval)
-            states.append((placeWall(wall[0],wall[1],tempState,isX),eval))
+                bisect.insort(bestValues,eval)
+                states.append((placeWall(wall[0],wall[1],tempState,isX),eval))
+    else:
+        eval=evalState(state,isX)
+        bisect.insort(bestValues,eval)
+        states.append((tempState,eval))
 
 def getLine(state,start,end):
     x1=start[0]
@@ -924,9 +951,6 @@ def validatePaths(state):
             tmp=copy.deepcopy(state)
             for jump in state[5][pawn][end][1]:
                 if not validatePawnMove(tmp,pawn,jump[0],jump[1]):
-                    #print("pathfind:")
-                    #print(pawn,"->",end," skok:",jump)
-                    #printBoard(tmp)
                     newPath=pathFind(state,state[2][pawn],state[1][end])
                     if not newPath:
                         return False
@@ -950,9 +974,36 @@ def evalState(state,isX):
         retVal-=500000
     if retVal!=0:
         return retVal
+
     
     xPiun= 10000 - pathHeuristics(state[2]["X1"],state[1]["O1"])-pathHeuristics(state[2]["X1"],state[1]["O2"])-pathHeuristics(state[2]["X2"],state[1]["O1"])-pathHeuristics(state[2]["X2"],state[1]["O2"])
     oPiun= -10000 + pathHeuristics(state[2]["O1"],state[1]["X1"])+pathHeuristics(state[2]["O1"],state[1]["X2"])+pathHeuristics(state[2]["O2"],state[1]["X1"])+pathHeuristics(state[2]["O2"],state[1]["X2"])
+
+    if state[5]["X1"]["O1"][0]==-1:
+        xPaths=list()
+        if state[2]["X1"] in state[5]["X1"]["O1"][1]:
+            xPaths.append(len(state[5]["X1"]["O1"][1])-state[5]["X1"]["O1"][1].index(state[2]["X1"]))
+        if state[2]["X1"] in state[5]["X1"]["O2"][1]:
+            xPaths.append(len(state[5]["X1"]["O2"][1])-state[5]["X1"]["O2"][1].index(state[2]["X1"]))
+        if state[2]["X2"] in state[5]["X2"]["O1"][1]:
+            xPaths.append(len(state[5]["X2"]["O1"][1])-state[5]["X2"]["O1"][1].index(state[2]["X2"]))
+        if state[2]["X2"] in state[5]["X2"]["O2"][1]:
+            xPaths.append(len(state[5]["X2"]["O2"][1])-state[5]["X2"]["O2"][1].index(state[2]["X2"]))
+        if xPaths:
+            xPiun=100000-min(xPaths)*50
+        oPaths=list()
+        if state[2]["O1"] in state[5]["O1"]["X1"][1]:
+            oPaths.append(len(state[5]["O1"]["X1"][1])-state[5]["O1"]["X1"][1].index(state[2]["O1"]))
+        if state[2]["O1"] in state[5]["O1"]["X2"][1]:
+            oPaths.append(len(state[5]["O1"]["X2"][1])-state[5]["O1"]["X2"][1].index(state[2]["O1"]))
+        if state[2]["O2"] in state[5]["O2"]["X1"][1]:
+            oPaths.append(len(state[5]["O2"]["X1"][1])-state[5]["O2"]["X1"][1].index(state[2]["O2"]))
+        if state[2]["O2"] in state[5]["O2"]["X2"][1]:
+            oPaths.append(len(state[5]["O2"]["X2"][1])-state[5]["O2"]["X2"][1].index(state[2]["O2"]))
+        if oPaths:
+            oPiun=-100000+min(oPaths)*50
+        return xPiun+oPiun
+        
 
     Lines=list()
     Lines.append(getLine(state,state[2]["X1"],state[1]["O1"]))
@@ -984,5 +1035,6 @@ def evalState(state,isX):
         return xPiun+oPiun+xZid*3+oZid
     else:
         return xPiun+oPiun+oZid*3+xZid
+
 
 game()
